@@ -4,9 +4,12 @@ class Picture
   include Magick
 
   def initialize(path)
+    image = Image.read(path).first#.resize_to_fit(320, 320)
+
+    @pixel_count = image.rows * image.columns
     @histogram = {}
 
-    Image.read(path).first.color_histogram.each do |pixel, count|
+    image.color_histogram.each do |pixel, count|
       color_8bit = {
         R: pixel.red / 256,
         G: pixel.green / 256,
@@ -23,7 +26,41 @@ class Picture
   end
 
   def test # TODO: remove
+    #puts @pixel_count
     @histogram.each { |color, count| puts "#{color}: #{count}" }
+  end
+
+  def similarity(target, threshold_norm)
+    fail 'Similarity needs hex color.' unless target =~ /^#[0-9a-fA-F]{6}$/
+
+    target = {
+      :R => target[1..2].to_i(16),
+      :G => target[3..4].to_i(16),
+      :B => target[5..6].to_i(16)
+    }
+    target.merge!(rgb2xyz(target[:R], target[:G], target[:B]))
+    target.merge!(xyz2lab(target[:X], target[:Y], target[:Z]))
+    
+    @histogram.each do |color, count|
+      color.merge!(deltaE94(color, target))
+    
+    end
+
+    sorted_histogram = @histogram.sort_by { |color, count| color[:deltaE] }
+
+    min_deltaE = sorted_histogram.first[0][:deltaE]
+    max_deltaE = sorted_histogram.last[0][:deltaE]
+    threshold = min_deltaE + ((max_deltaE - min_deltaE) * threshold_norm)
+
+    @histogram = sorted_histogram.to_h
+    @histogram = @histogram.keep_if do |color, count|
+      color[:deltaE] <= threshold
+    end
+
+    similarity_count = 0
+    @histogram.each { |color, count| similarity_count += count }
+
+    100 * (similarity_count / @pixel_count.to_f)
   end
 
   private
@@ -80,7 +117,32 @@ class Picture
       :b => 200 * (f_y - f_z)
     }
   end
+
+  def deltaE94(source, target)
+    k1 = 0.045
+    k2 = 0.015
+    kL = kC = kH = 1
+
+    dL = source[:L] - target[:L]
+    da = source[:a] - target[:a]
+    db = source[:b] - target[:b]
+
+    c1 = Math.sqrt((source[:a] ** 2) + (source[:b] ** 2))
+    c2 = Math.sqrt((target[:a] ** 2) + (target[:b] ** 2))
+    dC = c1 - c2
+
+    dH2 = (da ** 2) + (db ** 2) - (dC ** 2)
+
+    sL = 1
+    sC = 1 + (k1 * c1)
+    sH = 1 + (k2 * c1)
+
+    dE2 = ((dL/(kL*sL))**2) + ((dC/(kC*sC)) ** 2) + (dH2/((kH*sH)**2))
+
+    { deltaE: Math.sqrt(dE2) }
+  end
 end
 
-pic = Picture.new('test_images/00593_autumnsunflower_1920x1200.jpg')
-pic.test
+#pic = Picture.new('test_images/00593_autumnsunflower_1920x1200.jpg')
+#pic.similarity('#fde352', 0.25)
+#pic.test
