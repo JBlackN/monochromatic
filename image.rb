@@ -50,7 +50,8 @@ class Picture
       results << deltaE94(color, target)[:deltaE]
     end
 
-    results
+    results.min
+    #results.inject(:+).to_f / results.size
   end
 
   private
@@ -176,7 +177,6 @@ class Picture
         diff = [diff, deltaE94(old_center, cluster[:center])[:deltaE]].max
       end
 
-      puts diff # TODO: del
       break if diff < min_diff
     end
 
