@@ -3,8 +3,9 @@ require 'rmagick'
 class Picture
   include Magick
 
-  def initialize(path, k, min_diff)
-    image = Image.read(path).first#.resize_to_fit(320, 320)
+  def initialize(path, k, min_diff, resize = false)
+    image = Image.read(path).first
+    image = image.resize_to_fit(resize) if resize
 
     @pixel_count = image.rows * image.columns
     @histogram = {}

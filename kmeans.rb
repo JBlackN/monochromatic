@@ -1,3 +1,4 @@
 require './image'
 
-image = Picture.new('test_images/03023_pinetree_1920x1080.jpg', 3, 1)
+path = 'test_images/03023_pinetree_1920x1080.jpg'
+image = Picture.new(path, 3, 1, 320)
