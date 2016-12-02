@@ -63,6 +63,59 @@ class Picture
     100 * (similarity_count / @pixel_count.to_f)
   end
 
+  def kmeans(k, min_diff)
+    clusters = []
+    min_diff = min_diff.to_f
+
+    @histogram.to_a.sample(k).to_h.each do |color, count|
+      clusters << {
+        histogram: { color => count },
+        center: color
+      }
+    end
+
+    while true do
+      cluster_colors = []
+      k.times { |i| cluster_colors[i] = {} }
+
+      @histogram.each do |color, count|
+        cluster_index = nil
+        min_distance = Float::INFINITY
+
+        k.times do |i|
+          center_color = clusters[i][:center]
+          distance = deltaE94(center_color, color)[:deltaE] # TODO: order?
+
+          if distance < min_distance
+            min_distance = distance
+            cluster_index = i
+          end
+        end
+
+        cluster_colors[cluster_index].merge!(color => count)
+      end
+
+      diff = 0
+
+      k.times do |i|
+        cluster = clusters[i]
+        old_center = cluster[:center]
+
+        cluster[:histogram] = cluster_colors[i]
+        cluster[:center] = update_center(cluster[:histogram], k)
+
+        diff = [diff, deltaE94(old_center, cluster[:center])[:deltaE]].max
+      end
+
+      puts diff # TODO: del
+      break if diff < min_diff
+    end
+
+    centers = []
+    clusters.each { |cluster| centers << cluster[:center] }
+    centers
+  end
+
   private
 
   def rgb2xyz(r, g, b)
@@ -140,6 +193,25 @@ class Picture
     dE2 = ((dL/(kL*sL))**2) + ((dC/(kC*sC)) ** 2) + (dH2/((kH*sH)**2))
 
     { deltaE: Math.sqrt(dE2) }
+  end
+
+  def update_center(histogram, k)
+    center = {
+      :R => 0.0, :G => 0.0, :B => 0.0,
+      :X => 0.0, :Y => 0.0, :Z => 0.0,
+      :L => 0.0, :a => 0.0, :b => 0.0
+    }
+    total_count = 0
+
+    histogram.each do |color, count|
+      center = center.map do |component, value|
+        [component, value + (color[component] * count)]
+      end.to_h
+
+      total_count += count
+    end
+
+    center.map { |component, value| [component, value / total_count] }.to_h
   end
 end
 
