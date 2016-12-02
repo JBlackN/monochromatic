@@ -26,7 +26,6 @@ class Picture
     end
 
     @dominant_colors = kmeans(k, min_diff)
-    puts "#{@dominant_colors}"
   end
 
   def test # TODO: remove
@@ -34,7 +33,7 @@ class Picture
     @histogram.each { |color, count| puts "#{color}: #{count}" }
   end
 
-  def similarity(target, threshold_norm)
+  def similarity(target)
     fail 'Similarity needs hex color.' unless target =~ /^#[0-9a-fA-F]{6}$/
 
     target = {
@@ -45,26 +44,13 @@ class Picture
     target.merge!(rgb2xyz(target[:R], target[:G], target[:B]))
     target.merge!(xyz2lab(target[:X], target[:Y], target[:Z]))
     
-    @histogram.each do |color, count|
-      color.merge!(deltaE94(color, target))
-    
+    results = []
+
+    @dominant_colors.each do |color|
+      results << deltaE94(color, target)[:deltaE]
     end
 
-    sorted_histogram = @histogram.sort_by { |color, count| color[:deltaE] }
-
-    min_deltaE = sorted_histogram.first[0][:deltaE]
-    max_deltaE = sorted_histogram.last[0][:deltaE]
-    threshold = min_deltaE + ((max_deltaE - min_deltaE) * threshold_norm)
-
-    @histogram = sorted_histogram.to_h
-    @histogram = @histogram.keep_if do |color, count|
-      color[:deltaE] <= threshold
-    end
-
-    similarity_count = 0
-    @histogram.each { |color, count| similarity_count += count }
-
-    100 * (similarity_count / @pixel_count.to_f)
+    results
   end
 
   private
