@@ -196,11 +196,7 @@ class Picture
   end
 
   def update_center(histogram, k)
-    center = {
-      :R => 0.0, :G => 0.0, :B => 0.0,
-      :X => 0.0, :Y => 0.0, :Z => 0.0,
-      :L => 0.0, :a => 0.0, :b => 0.0
-    }
+    center = { :L => 0.0, :a => 0.0, :b => 0.0 }
     total_count = 0
 
     histogram.each do |color, count|
