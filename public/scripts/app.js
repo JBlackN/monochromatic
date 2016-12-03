@@ -1,14 +1,26 @@
 (function() {
 
+  var headerColored = document.getElementById('header-colored');
+  var searchColor = document.getElementById('search-color');
+  searchColor.addEventListener('input', function() {
+    headerColored.style.color = searchColor.value;
+    document.getElementById('progress-value').style.backgroundColor = searchColor.value;
+  });
+
   var searchSubmit = document.getElementById('search-submit');
   searchSubmit.addEventListener('click', search);
+
+  var itemsProcessed = 0;
+  var itemsTotal = 0;
 
   function search() {
     var searchText = document.getElementById('search-text').value;
 
+    itemsProcessed = 0;
+    itemsTotal = 0;
     document.getElementById('results').innerHTML = '';
-    document.getElementById('info-processed').innerText = 0;
-    document.getElementById('info-total').innerText = 0;
+    document.getElementById('progress-bar').style.display = 'initial'
+    document.getElementById('progress-value').style.display = 'initial';
 
     var request = new XMLHttpRequest();
     request.addEventListener('readystatechange', getResults);
@@ -20,13 +32,12 @@
     if (this.readyState == 4 && this.status == 200) {
       results = JSON.parse(this.responseText);
       results.forEach(similarityOrder);
-
-      document.getElementById('info-total').innerText = results.length;
+      itemsTotal = results.length;
     }
   }
 
   function similarityOrder(result) {
-    var searchColor = document.getElementById('search-color').value;
+    searchColor = document.getElementById('search-color').value;
 
     var farmId = result.farm_id;
     var serverId = result.server_id;
@@ -34,31 +45,78 @@
     var secret = result.secret;
 
     var thumbnailUrl = 'https://farm' + farmId + '.staticflickr.com/' + serverId + '/' + id + '_' + secret + '_m.jpg';
+    var photoUrl = 'https://farm' + farmId + '.staticflickr.com/' + serverId + '/' + id + '_' + secret + '_h.jpg';
 
     var requestUrl = '/similarity?id=' + id + '&url=' + thumbnailUrl + '&color=' + encodeURIComponent(searchColor);
 
     var request = new XMLHttpRequest();
     request.addEventListener('readystatechange', function() {
       if (this.readyState == 4 && this.status == 200) {
-        displayImage(JSON.parse(this.responseText), thumbnailUrl);
+        displayImage(JSON.parse(this.responseText), photoUrl);
       }
     });
     request.open("GET", requestUrl, true);
     request.send();
   }
 
-  function displayImage(similarity, thumbnailUrl) {
-    console.log(similarity);
-    document.getElementById('info-processed').innerText++;
+  function displayImage(similarity, photoUrl) {
+    itemsProcessed++;
+    progressValue = document.getElementById('progress-value');
+    progressValue.style.width = ((itemsProcessed / itemsTotal) * 100) + '%';
 
     var resultList = document.getElementById('results');
     var resultItems = resultList.getElementsByTagName('li');
 
+    // TODO: undo
     var newListItem = document.createElement('li');
-    var img = document.createElement('img');
-    img.src = thumbnailUrl;
-    img.title = similarity.deltaE;
-    newListItem.appendChild(img);
+    var imgWrapper = document.createElement('div');
+    imgWrapper.className = 'image-wrapper';
+    imgWrapper.style.width = '200px';
+    imgWrapper.style.height = '200px';
+    imgWrapper.style.textAlign = 'center';
+    imgWrapper.style.margin = '0 0.2em 0.2em 0.2em';
+    imgWrapper.style.overflow = 'hidden';
+    var img = document.createElement('div');
+    img.className = 'image';
+    img.style.backgroundImage = "url('" + photoUrl + "')";
+    //img.title = similarity.deltaE;
+    var imgMeta = document.createElement('p');
+    imgMeta.style.height = '12px';
+    imgMeta.style.width = '200px';
+    imgMeta.style.textAlign = 'center';
+    imgMeta.style.margin = 0;
+    var imgMetaDelta = document.createElement('span');
+    imgMetaDelta.className = 'img-meta';
+    var delta = document.createTextNode('Δ ');
+    var deltaValue = document.createElement('span');
+    deltaValue.className = 'similarity';
+    deltaValue.innerText = similarity.deltaE.toFixed(2);
+    var imgMetaPercent = document.createElement('span');
+    imgMetaPercent.className = 'img-meta';
+    var percent = document.createTextNode('% ');
+    var percentValue = document.createElement('span');
+    percentValue.className = 'percentage';
+    percentValue.innerText = similarity.percentage.toFixed(2);
+
+    imgMetaDelta.appendChild(delta);
+    imgMetaDelta.appendChild(deltaValue);
+    imgMetaPercent.appendChild(percent);
+    imgMetaPercent.appendChild(percentValue);
+    imgMeta.appendChild(imgMetaDelta);
+    imgMeta.appendChild(imgMetaPercent);
+    imgWrapper.appendChild(img);
+    imgWrapper.appendChild(imgMeta);
+    newListItem.appendChild(imgWrapper);
+
+    img.addEventListener('mouseenter', function() {
+      var searchColor = document.getElementById('search-color').value
+      img.style.boxShadow = '0 0 0 0.15em ' + searchColor + ' inset';
+      img.style.height = '184px';
+    })
+    img.addEventListener('mouseleave', function() {
+      img.style.boxShadow = 'none';
+      img.style.height = '200px';
+    })
 
     if (resultItems.length == 0) {
       resultList.appendChild(newListItem);
@@ -66,13 +124,18 @@
     else {
       var flag = false;
       for (var i = 0; i < resultItems.length; i++) {
-        if (similarity.deltaE < parseFloat(resultItems[i].childNodes[0].title)) {
+        if (similarity.deltaE < parseFloat(resultItems[i].childNodes[0].childNodes[1].childNodes[0].childNodes[1].innerText)) {
           resultList.insertBefore(newListItem, resultItems[i]);
           flag = true;
           break;
         }
       }
       if (!flag) resultList.appendChild(newListItem);
+    }
+
+    if (itemsProcessed == itemsTotal) {
+      document.getElementById('progress-bar').style.display = 'none';
+      document.getElementById('progress-value').style.display = 'none';
     }
   }
 

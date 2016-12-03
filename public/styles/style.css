@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css?family=Istok+Web:400,400i,700,700i|Montserrat:400,700');
+
+div#progress-bar, div#progress-value {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0.4em;
+  background-color: #ddd;
+}
+
+div#progress-value {
+  width: 0%;
+}
+
+body {
+  /*background: #fafafa;
+  color: #0f0f0f;*/
+  padding: 1em;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9em;
+}
+
+h1 {
+  margin: 0;
+  font-family: 'Istok Web', sans-serif;
+  font-size: 2em;
+  text-transform: lowercase;
+}
+
+ol#controls-basic li {
+  float: left;
+  margin: 0 1em;
+  padding: 0 0 0 0.3em;
+  height: 2em;
+  line-height: 2em;
+}
+
+div#controls input {
+  height: 1em;
+  vertical-align: text-bottom;
+  margin: 0 0.75em 0 1em;
+  font-family: 'Montserrat', sans-serif;
+}
+
+ol#results {
+  clear: both;
+  margin: 5em 0;
+  list-style-type: none;
+}
+
+ol#results li {
+  display: inline-block;
+  vertical-align: top;
+}
+
+ol#results li div.image-wrapper div.image {
+  width: 200px;
+  height: 200px;
+  /*margin: 0 0.2em 0.2em 0.2em;*/
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+span.img-meta {
+  margin: 0 0.25em;
+}
