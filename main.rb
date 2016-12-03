@@ -1,28 +1,7 @@
-require './image'
+require './flickr'
 
-results = {}
-
-test_images = Dir['test_images/*']
-i = 1
-
-test_images.each do |test_image|
-  puts "Processing #{test_image} (#{i}/#{test_images.length})"
-  
-  pic = Picture.new(test_image, 3, 1, 200)
-  similarity = pic.similarity('#0158cc')
-  
-  results[test_image.to_sym] = similarity
-
-  sim = "%.4f" % similarity[:deltaE]
-  perc = "%.4f%" % similarity[:percentage]
-  puts "  - similarity: #{sim}, percentage: #{perc}"
-  i += 1
-end
-
-puts
-puts 'Results'
-80.times { print '=' }
-puts
+flickr = Flickr.new('6b9f37752302a413f13966f78431d076')
+results = flickr.search('purple', '#7410a5')
 
 results_by_sim = results.sort_by do |image, similarity|
   similarity[:deltaE]
