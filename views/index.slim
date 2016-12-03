@@ -1,0 +1,30 @@
+doctype html
+html
+  head
+    title Flickr Colors
+    meta charset='utf-8'
+
+  body
+    h1 Flickr Colors
+
+    p id='info-processed'
+    p id='info-total'
+
+    div id='controls'
+      label for='search-text' Hledaný text
+      input id='search-text' type='text'
+      br
+
+      label for='search-color-switch' Dle barvy
+      input id='search-color-switch' type='checkbox' checked=true
+      br
+
+      label for='search-color' Hledaná barva
+      input id='search-color' type='color'
+      br
+
+      button id='search-submit' type='button' Hledat
+
+    ol id='results'
+
+    script type='text/javascript' src='scripts/app.js'

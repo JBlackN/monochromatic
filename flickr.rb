@@ -10,7 +10,7 @@ class Flickr
     @api_key = api_key
   end
 
-  def search(text, color_hex)
+  def search(text)
     params = {
       method: 'flickr.photos.search',
       format: 'json',
@@ -27,29 +27,16 @@ class Flickr
     fail 'API call failed.' unless response.is_a?(Net::HTTPSuccess)
 
     flickr_results = JSON.parse(response.body[/jsonFlickrApi\((.*)\)/, 1], { symbolize_names: true })
-    results = {}
+    results = []
 
     flickr_results[:photos][:photo].each do |photo|
-      farm_id = photo[:farm]
-      server_id = photo[:server]
-      id = photo[:id]
-      secret = photo[:secret]
-
-      photo_url = "https://farm#{farm_id}.staticflickr.com/#{server_id}/#{id}_#{secret}_h.jpg"
-      thumbnail_url = "https://farm#{farm_id}.staticflickr.com/#{server_id}/#{id}_#{secret}_m.jpg"
-      cached_path = "image_cache/#{id}.jpg"
-
-      open_uri_opts = { ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE }
-      open(thumbnail_url, open_uri_opts) do |photo|
-        File.open(cached_path, 'wb') do |file|
-          file.puts photo.read
-        end
-      end
-
-      pic = Picture.new("image_cache/#{id}.jpg", 3, 1)
-      results[photo_url.to_sym] = pic.similarity(color_hex)
-
-      FileUtils.rm_f cached_path
+      results << {
+        farm_id: photo[:farm],
+        server_id: photo[:server],
+        id: photo[:id],
+        secret: photo[:secret],
+        title: photo[:title]
+      }
     end
 
     results
