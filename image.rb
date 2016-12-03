@@ -8,7 +8,7 @@ class Picture
     image = image.resize_to_fit(resize) if resize
 
     @pixel_count = image.rows * image.columns
-    @histogram = {}
+    @histogram = Hash.new(0)
 
     image.color_histogram.each do |pixel, count|
       color_8bit = {
@@ -17,7 +17,7 @@ class Picture
         B: pixel.blue / 256
       }
 
-      @histogram[color_8bit] = count
+      @histogram[color_8bit] += count
     end
 
     @histogram.each do |color, count|
@@ -46,11 +46,14 @@ class Picture
     
     results = []
 
-    @dominant_colors.each do |color|
-      results << deltaE94(color, target)[:deltaE]
+    @dominant_colors.each do |color, percentage|
+      results << {
+        deltaE: deltaE94(color, target)[:deltaE],
+        percentage: percentage
+      }
     end
 
-    results.min
+    results.min_by { |result| result[:deltaE] }
     #results.inject(:+).to_f / results.size
   end
 
@@ -143,7 +146,7 @@ class Picture
         center: color
       }
     end
-
+    
     while true do
       cluster_colors = []
       k.times { |i| cluster_colors[i] = {} }
@@ -180,8 +183,14 @@ class Picture
       break if diff < min_diff
     end
 
-    centers = []
-    clusters.each { |cluster| centers << cluster[:center] }
+    centers = {}
+    clusters.each do |cluster|
+      cluster_pix_count = 0
+      cluster[:histogram].each { |color, count| cluster_pix_count += count}
+      cluster_percentage = 100 * (cluster_pix_count.to_f / @pixel_count)
+
+      centers[cluster[:center]] = cluster_percentage
+    end
     centers
   end
 
