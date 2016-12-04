@@ -22,6 +22,7 @@ get '/similarity' do
   id = params[:id]
   url = params[:url]
   color = params[:color]
+  type = params[:type]
 
   cached_path = "./image_cache/#{id}.jpg"
   open_uri_opts = { ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE }
@@ -32,8 +33,17 @@ get '/similarity' do
     end
   end
 
-  pic = Picture.new(cached_path, 3, 1) # TODO: custom k, min_diff
-  similarity = pic.similarity(color)
+  if type.include?('km')
+    k = params[:k].to_i
+    min_diff = params[:mindiff].to_f
+    pic = Picture.new(cached_path, k, min_diff)
+  else
+    pic = Picture.new(cached_path)
+  end
+
+  threshold = type.include?('tc') ? params[:threshold].to_f : nil
+
+  similarity = pic.similarity(type, color, threshold)
 
   FileUtils.rm_f cached_path
 

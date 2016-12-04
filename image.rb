@@ -3,7 +3,7 @@ require 'rmagick'
 class Picture
   include Magick
 
-  def initialize(path, k, min_diff, resize = false)
+  def initialize(path, k = nil, min_diff = nil, resize = false)
     image = Image.read(path).first
     image = image.resize_to_fit(resize) if resize
 
@@ -25,15 +25,10 @@ class Picture
       color.merge!(xyz2lab(color[:X], color[:Y], color[:Z]))
     end
 
-    @dominant_colors = kmeans(k, min_diff)
+    @dominant_colors = kmeans(k, min_diff) unless k.nil? || min_diff.nil?
   end
 
-  def test # TODO: remove
-    #puts @pixel_count
-    @histogram.each { |color, count| puts "#{color}: #{count}" }
-  end
-
-  def similarity(target)
+  def similarity(type, target, threshold = nil)
     fail 'Similarity needs hex color.' unless target =~ /^#[0-9a-fA-F]{6}$/
 
     target = {
@@ -43,18 +38,39 @@ class Picture
     }
     target.merge!(rgb2xyz(target[:R], target[:G], target[:B]))
     target.merge!(xyz2lab(target[:X], target[:Y], target[:Z]))
-    
-    results = []
 
-    @dominant_colors.each do |color, percentage|
-      results << {
-        deltaE: deltaE94(color, target)[:deltaE],
-        percentage: percentage
-      }
+    if type.include?('km')
+      results = []
+
+      @dominant_colors.each do |color, percentage|
+        results << {
+          deltaE: deltaE94(color, target)[:deltaE],
+          cluster_percentage: percentage
+        }
+      end
+
+      result = results.min_by { |result| result[:deltaE] }
     end
 
-    results.min_by { |result| result[:deltaE] }
-    #results.inject(:+).to_f / results.size
+    if type.include?('tc') && !threshold.nil?
+      @histogram.each do |color, count|
+        color.merge!(deltaE94(color, target))
+      end
+
+      sorted_histogram = @histogram.sort_by { |color, count| color[:deltaE] }
+      @histogram = sorted_histogram.to_h
+      @histogram = @histogram.keep_if do |color, count|
+        color[:deltaE] <= threshold
+      end
+
+      similarity_count = 0
+      @histogram.each { |color, count| similarity_count += count }
+      
+      result ||= {}
+      result[:threshold_percentage] = 100 * (similarity_count / @pixel_count.to_f)
+    end
+
+    result
   end
 
   private
@@ -209,7 +225,3 @@ class Picture
     center.map { |component, value| [component, value / total_count] }.to_h
   end
 end
-
-#pic = Picture.new('test_images/00593_autumnsunflower_1920x1200.jpg')
-#pic.similarity('#fde352', 0.25)
-#pic.test

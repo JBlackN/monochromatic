@@ -1,5 +1,6 @@
 (function() {
 
+  var algorithm = null;
   var searchColor = document.getElementById('search-color');
 
   var headerColored = document.getElementById('header-colored');
@@ -65,6 +66,20 @@
   function search() {
     var searchText = document.getElementById('search-text').value;
 
+    var algorithms = document.getElementsByName('search-algorithm');
+    for (var i = 0; i < algorithms.length; i++) {
+      if (algorithms[i].checked) algorithm = {
+        type: algorithms[i].value,
+        params: []
+      };
+    }
+    if (algorithm.type == 'tc' || algorithm.type == 'kmtc')
+      algorithm.params.push(['threshold', document.getElementById('search-thr').value]);
+    if (algorithm.type != 'tc') {
+      algorithm.params.push(['k', document.getElementById('search-km-k').value]);
+      algorithm.params.push(['mindiff', document.getElementById('search-km-min-diff').value]);
+    }
+
     itemsProcessed = 0;
     itemsTotal = 0;
     document.getElementById('results').innerHTML = '';
@@ -96,7 +111,11 @@
     var thumbnailUrl = 'https://farm' + farmId + '.staticflickr.com/' + serverId + '/' + id + '_' + secret + '_m.jpg';
     var photoUrl = 'https://farm' + farmId + '.staticflickr.com/' + serverId + '/' + id + '_' + secret + '_h.jpg';
 
-    var requestUrl = '/similarity?id=' + id + '&url=' + thumbnailUrl + '&color=' + encodeURIComponent(searchColor);
+    var requestUrl = '/similarity?id=' + id + '&url=' + thumbnailUrl + '&color=' + encodeURIComponent(searchColor) + '&type=' + algorithm.type;
+    for (var i = 0; i < algorithm.params.length; i++) {
+      var param = algorithm.params[i];
+      requestUrl += ('&' + param[0] + '=' + param[1]);
+    }
 
     var request = new XMLHttpRequest();
     request.addEventListener('readystatechange', function() {
@@ -116,7 +135,6 @@
     var resultList = document.getElementById('results');
     var resultItems = resultList.getElementsByTagName('li');
 
-    // TODO: undo
     var newListItem = document.createElement('li');
     var imgWrapper = document.createElement('div');
     imgWrapper.className = 'image-wrapper';
@@ -128,31 +146,37 @@
     var img = document.createElement('div');
     img.className = 'image';
     img.style.backgroundImage = "url('" + photoUrl + "')";
-    //img.title = similarity.deltaE;
     var imgMeta = document.createElement('p');
     imgMeta.style.height = '12px';
     imgMeta.style.width = '200px';
     imgMeta.style.textAlign = 'center';
     imgMeta.style.margin = 0;
-    var imgMetaDelta = document.createElement('span');
-    imgMetaDelta.className = 'img-meta';
-    var delta = document.createTextNode('Δ ');
-    var deltaValue = document.createElement('span');
-    deltaValue.className = 'similarity';
-    deltaValue.innerText = similarity.deltaE.toFixed(2);
+
+    if (algorithm.type != 'tc') {
+      var imgMetaDelta = document.createElement('span');
+      imgMetaDelta.className = 'img-meta';
+      var delta = document.createTextNode('Δ ');
+      var deltaValue = document.createElement('span');
+      deltaValue.className = 'similarity';
+      deltaValue.innerText = similarity.deltaE.toFixed(2);
+      imgMetaDelta.appendChild(delta);
+      imgMetaDelta.appendChild(deltaValue);
+      imgMeta.appendChild(imgMetaDelta);
+    }
+
     var imgMetaPercent = document.createElement('span');
     imgMetaPercent.className = 'img-meta';
     var percent = document.createTextNode('% ');
     var percentValue = document.createElement('span');
     percentValue.className = 'percentage';
-    percentValue.innerText = similarity.percentage.toFixed(2);
-
-    imgMetaDelta.appendChild(delta);
-    imgMetaDelta.appendChild(deltaValue);
+    if (algorithm.type == 'tc' || algorithm.type == 'kmtc')
+      percentValue.innerText = similarity.threshold_percentage.toFixed(2);
+    else
+      percentValue.innerText = similarity.cluster_percentage.toFixed(2);
     imgMetaPercent.appendChild(percent);
     imgMetaPercent.appendChild(percentValue);
-    imgMeta.appendChild(imgMetaDelta);
     imgMeta.appendChild(imgMetaPercent);
+
     imgWrapper.appendChild(img);
     imgWrapper.appendChild(imgMeta);
     newListItem.appendChild(imgWrapper);
@@ -167,19 +191,37 @@
       img.style.height = '200px';
     })
 
-    if (resultItems.length == 0) {
-      resultList.appendChild(newListItem);
+    if (algorithm.type == 'tc') {
+      if (resultItems.length == 0) {
+        resultList.appendChild(newListItem);
+      }
+      else {
+        var flag = false;
+        for (var i = 0; i < resultItems.length; i++) {
+          if (similarity.threshold_percentage > parseFloat(resultItems[i].childNodes[0].childNodes[1].childNodes[0].childNodes[1].innerText)) {
+            resultList.insertBefore(newListItem, resultItems[i]);
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) resultList.appendChild(newListItem);
+      }
     }
     else {
-      var flag = false;
-      for (var i = 0; i < resultItems.length; i++) {
-        if (similarity.deltaE < parseFloat(resultItems[i].childNodes[0].childNodes[1].childNodes[0].childNodes[1].innerText)) {
-          resultList.insertBefore(newListItem, resultItems[i]);
-          flag = true;
-          break;
-        }
+      if (resultItems.length == 0) {
+        resultList.appendChild(newListItem);
       }
-      if (!flag) resultList.appendChild(newListItem);
+      else {
+        var flag = false;
+        for (var i = 0; i < resultItems.length; i++) {
+          if (similarity.deltaE < parseFloat(resultItems[i].childNodes[0].childNodes[1].childNodes[0].childNodes[1].innerText)) {
+            resultList.insertBefore(newListItem, resultItems[i]);
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) resultList.appendChild(newListItem);
+      }
     }
 
     if (itemsProcessed == itemsTotal) {
