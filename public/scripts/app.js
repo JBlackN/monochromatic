@@ -1,10 +1,37 @@
 (function() {
 
-  var headerColored = document.getElementById('header-colored');
   var searchColor = document.getElementById('search-color');
+
+  var headerColored = document.getElementById('header-colored');
   searchColor.addEventListener('input', function() {
     headerColored.style.color = searchColor.value;
     document.getElementById('progress-value').style.backgroundColor = searchColor.value;
+  });
+
+  var controlsAdvanced = document.getElementById('controls-advanced');
+  var controlsAdvToggle = document.getElementById('controls-advanced-toggle');
+  var controlsAdvToggled = false;
+  controlsAdvToggle.addEventListener('mouseenter', function() {
+    controlsAdvToggle.style.fontSize = '1.45em';
+    if (!controlsAdvToggled)
+      controlsAdvToggle.style.color = searchColor.value;
+  });
+  controlsAdvToggle.addEventListener('mouseleave', function() {
+    controlsAdvToggle.style.fontSize = '1.33em';
+    if (!controlsAdvToggled)
+      controlsAdvToggle.style.color = '#000';
+  });
+  controlsAdvToggle.addEventListener('click', function() {
+    if (controlsAdvToggled) {
+      controlsAdvanced.style.display = 'none';
+      controlsAdvToggle.style.color = '#000';
+      controlsAdvToggled = false;
+    }
+    else {
+      controlsAdvanced.style.display = 'block';
+      controlsAdvToggle.style.color = searchColor.value;
+      controlsAdvToggled = true;
+    }
   });
 
   var searchSubmit = document.getElementById('search-submit');

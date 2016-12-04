@@ -29,7 +29,29 @@ h1 {
   text-transform: lowercase;
 }
 
-ol#controls-basic li {
+div#controls input {
+  height: 1em;
+  vertical-align: text-bottom;
+  margin: 0 0.75em 0 1em;
+  font-family: 'Montserrat', sans-serif;
+}
+
+div i#controls-advanced-toggle {
+  float: right;
+  position: relative;
+  top: 0.25em;
+  font-size: 1.33em;
+  cursor: pointer;
+}
+
+ul#controls-advanced {
+  clear: both;
+  display: none;
+  width: 100%;
+  list-style-type: none;
+}
+
+ol#controls-basic li, ul#controls-advanced li {
   float: left;
   margin: 0 1em;
   padding: 0 0 0 0.3em;
@@ -37,11 +59,8 @@ ol#controls-basic li {
   line-height: 2em;
 }
 
-div#controls input {
-  height: 1em;
-  vertical-align: text-bottom;
-  margin: 0 0.75em 0 1em;
-  font-family: 'Montserrat', sans-serif;
+ul#controls-advanced li {
+  margin: 0.3em 1em 0 0.3em;
 }
 
 ol#results {
