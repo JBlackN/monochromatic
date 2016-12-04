@@ -31,7 +31,7 @@ h1 {
 
 div#controls input {
   height: 1em;
-  vertical-align: text-bottom;
+  vertical-align: middle;
   margin: 0 0.75em 0 1em;
   font-family: 'Montserrat', sans-serif;
 }

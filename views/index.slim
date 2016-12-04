@@ -39,10 +39,28 @@ html
         i id='controls-advanced-toggle' class='fa fa-cog'
 
       ul id='controls-advanced'
-        li Test 1
-        li Test 2
-        li Test 3
-        li Test 4
+        li
+          label for='search-algorithm' Which algorithm to use?
+          input name='search-algorithm' type='radio' value='tc' Threshold coverage
+          input name='search-algorithm' type='radio' value='km' checked=true K-means
+          input name='search-algorithm' type='radio' value='kmcc' K-means with cluster coverage
+          input name='search-algorithm' type='radio' value='kmtc' K-means with threshold coverage
+        br style='clear: both;'
+
+        li
+          label for='search-km-k' How many dominant colors should be extracted?
+          input id='search-km-k' type='range' min=1 max=16 value=3
+          span id='search-km-k-display' (3)
+
+        li
+          label for='search-km-min-diff' Difference between iterations before stopping k-means should be less than&hellip;?
+          input id='search-km-min-diff' type='number' min=0.05 max=20 step=0.05 value=1
+        br style='clear: both;'
+
+        li
+          label for='search-thr' Similarity threshold to include specific color in considerations should be&hellip;?
+          input id='search-thr' type='range' min=0.05 max=30 step=0.05 value=15
+          span id='search-thr-display' (15 ~ very obvious difference.)
 
     ol id='results'
 

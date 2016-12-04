@@ -34,6 +34,28 @@
     }
   });
 
+  var kMeansK = document.getElementById('search-km-k');
+  var kMeansKDisplay = document.getElementById('search-km-k-display');
+  kMeansK.addEventListener('input', function() {
+    kMeansKDisplay.innerText = '(' + kMeansK.value + ')';
+  });
+  var thrT = document.getElementById('search-thr');
+  var thrTDisplay = document.getElementById('search-thr-display');
+  thrT.addEventListener('input', function() {
+    var thrTMeaning = null;
+    if (thrT.value <=1)
+      thrTMeaning = 'normally invisible difference.';
+    else if (thrT.value <= 2)
+      thrTMeaning = 'very small difference, only obvious to a trained eye.';
+    else if (thrT.value <= 3.5)
+      thrTMeaning = 'medium difference, also obvious to an untrained eye.';
+    else if (thrT.value <= 5)
+      thrTMeaning = 'obvious difference.';
+    else
+      thrTMeaning = 'very obvious difference.';
+    thrTDisplay.innerText = '(' + thrT.value + ' ~ ' + thrTMeaning + ')';
+  });
+
   var searchSubmit = document.getElementById('search-submit');
   searchSubmit.addEventListener('click', search);
 
