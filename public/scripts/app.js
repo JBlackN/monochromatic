@@ -1,11 +1,11 @@
 (function() {
 
   var algorithm = null;
-  var searchColor = document.getElementById('search-color');
 
-  var headerColored = document.getElementById('header-colored');
+  var searchColor = document.getElementById('search-color');
   searchColor.addEventListener('input', function() {
-    headerColored.style.color = searchColor.value;
+    var searchColor = document.getElementById('search-color');
+    document.getElementById('header-colored').style.color = searchColor.value;
     document.getElementById('progress-value').style.backgroundColor = searchColor.value;
   });
 
@@ -13,6 +13,7 @@
   var controlsAdvToggle = document.getElementById('controls-advanced-toggle');
   var controlsAdvToggled = false;
   controlsAdvToggle.addEventListener('mouseenter', function() {
+    var searchColor = document.getElementById('search-color');
     controlsAdvToggle.style.fontSize = '1.45em';
     if (!controlsAdvToggled)
       controlsAdvToggle.style.color = searchColor.value;
@@ -286,6 +287,7 @@
     if (itemsProcessed == itemsTotal) {
       document.getElementById('progress-bar').style.display = 'none';
       document.getElementById('progress-value').style.display = 'none';
+      document.getElementById('progress-value').style.width = '0%';
     }
   }
 
