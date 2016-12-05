@@ -174,22 +174,24 @@
       imgMeta.appendChild(imgMetaDelta);
     }
 
-    var imgMetaPercent = document.createElement('span');
-    imgMetaPercent.className = 'img-meta';
-    var percent = document.createTextNode('% ');
-    var percentValue = document.createElement('span');
-    percentValue.className = 'percentage';
-    if (algorithm.type == 'tc' || algorithm.type == 'kmtc') {
-      percentValue.dataset.thresholdPercentage = similarity.threshold_percentage;
-      percentValue.innerText = similarity.threshold_percentage.toFixed(2);
+    if (algorithm.type != 'km') {
+      var imgMetaPercent = document.createElement('span');
+      imgMetaPercent.className = 'img-meta';
+      var percent = document.createTextNode('% ');
+      var percentValue = document.createElement('span');
+      percentValue.className = 'percentage';
+      if (algorithm.type == 'tc' || algorithm.type == 'kmtc') {
+        percentValue.dataset.thresholdPercentage = similarity.threshold_percentage;
+        percentValue.innerText = similarity.threshold_percentage.toFixed(2);
+      }
+      else {
+        percentValue.dataset.clusterPercentage = similarity.cluster_percentage;
+        percentValue.innerText = similarity.cluster_percentage.toFixed(2);
+      }
+      imgMetaPercent.appendChild(percent);
+      imgMetaPercent.appendChild(percentValue);
+      imgMeta.appendChild(imgMetaPercent);
     }
-    else {
-      percentValue.dataset.clusterPercentage = similarity.cluster_percentage;
-      percentValue.innerText = similarity.cluster_percentage.toFixed(2);
-    }
-    imgMetaPercent.appendChild(percent);
-    imgMetaPercent.appendChild(percentValue);
-    imgMeta.appendChild(imgMetaPercent);
 
     imgWrapper.appendChild(img);
     imgWrapper.appendChild(imgMeta);
@@ -260,7 +262,7 @@
         if (!flag) resultList.appendChild(newListItem);
       }
     }
-    else { // TODO: cont. here
+    else {
       if (resultItems.length == 0) {
         resultList.appendChild(newListItem);
       }
