@@ -116,9 +116,11 @@
     var serverId = result.server_id;
     var id = result.id;
     var secret = result.secret;
+    var userId = result.user;
 
     var thumbnailUrl = 'https://farm' + farmId + '.staticflickr.com/' + serverId + '/' + id + '_' + secret + '_m.jpg';
-    var photoUrl = 'https://farm' + farmId + '.staticflickr.com/' + serverId + '/' + id + '_' + secret + '_h.jpg';
+    var photoUrl = 'https://farm' + farmId + '.staticflickr.com/' + serverId + '/' + id + '_' + secret + '_z.jpg';
+    var linkUrl = 'https://www.flickr.com/photos/' + userId + '/' + id;
 
     var requestUrl = '/similarity?id=' + id + '&url=' + thumbnailUrl + '&color=' + encodeURIComponent(searchColor) + '&type=' + algorithm.type;
     for (var i = 0; i < algorithm.params.length; i++) {
@@ -129,14 +131,14 @@
     var request = new XMLHttpRequest();
     request.addEventListener('readystatechange', function() {
       if (this.readyState == 4 && this.status == 200) {
-        displayImage(JSON.parse(this.responseText), photoUrl);
+        displayImage(JSON.parse(this.responseText), photoUrl, linkUrl);
       }
     });
     request.open("GET", requestUrl, true);
     request.send();
   }
 
-  function displayImage(similarity, photoUrl) {
+  function displayImage(similarity, photoUrl, linkUrl) {
     itemsProcessed++;
     progressValue = document.getElementById('progress-value');
     progressValue.style.width = ((itemsProcessed / itemsTotal) * 100) + '%';
@@ -152,6 +154,9 @@
     imgWrapper.style.textAlign = 'center';
     imgWrapper.style.margin = '0 0.2em 0.2em 0.2em';
     imgWrapper.style.overflow = 'hidden';
+    var imgLink = document.createElement('a');
+    imgLink.href = linkUrl;
+    imgLink.target = '_blank';
     var img = document.createElement('div');
     img.className = 'image';
     img.style.backgroundImage = "url('" + photoUrl + "')";
@@ -193,7 +198,8 @@
       imgMeta.appendChild(imgMetaPercent);
     }
 
-    imgWrapper.appendChild(img);
+    imgLink.appendChild(img);
+    imgWrapper.appendChild(imgLink);
     imgWrapper.appendChild(imgMeta);
     newListItem.appendChild(imgWrapper);
 

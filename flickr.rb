@@ -35,7 +35,8 @@ class Flickr
         server_id: photo[:server],
         id: photo[:id],
         secret: photo[:secret],
-        title: photo[:title]
+        title: photo[:title],
+        user: photo[:owner]
       }
     end
 
