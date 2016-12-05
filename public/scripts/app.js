@@ -158,6 +158,7 @@
       var delta = document.createTextNode('Δ ');
       var deltaValue = document.createElement('span');
       deltaValue.className = 'similarity';
+      deltaValue.dataset.deltaE = similarity.deltaE;
       deltaValue.innerText = similarity.deltaE.toFixed(2);
       imgMetaDelta.appendChild(delta);
       imgMetaDelta.appendChild(deltaValue);
@@ -169,10 +170,14 @@
     var percent = document.createTextNode('% ');
     var percentValue = document.createElement('span');
     percentValue.className = 'percentage';
-    if (algorithm.type == 'tc' || algorithm.type == 'kmtc')
+    if (algorithm.type == 'tc' || algorithm.type == 'kmtc') {
+      percentValue.dataset.thresholdPercentage = similarity.threshold_percentage;
       percentValue.innerText = similarity.threshold_percentage.toFixed(2);
-    else
+    }
+    else {
+      percentValue.dataset.clusterPercentage = similarity.cluster_percentage;
       percentValue.innerText = similarity.cluster_percentage.toFixed(2);
+    }
     imgMetaPercent.appendChild(percent);
     imgMetaPercent.appendChild(percentValue);
     imgMeta.appendChild(imgMetaPercent);
@@ -198,7 +203,7 @@
       else {
         var flag = false;
         for (var i = 0; i < resultItems.length; i++) {
-          if (similarity.threshold_percentage > parseFloat(resultItems[i].childNodes[0].childNodes[1].childNodes[0].childNodes[1].innerText)) {
+          if (similarity.threshold_percentage > parseFloat(resultItems[i].childNodes[0].childNodes[1].childNodes[0].childNodes[1].dataset.thresholdPercentage)) {
             resultList.insertBefore(newListItem, resultItems[i]);
             flag = true;
             break;
@@ -207,15 +212,61 @@
         if (!flag) resultList.appendChild(newListItem);
       }
     }
-    else {
+    else if (algorithm.type == 'km') {
       if (resultItems.length == 0) {
         resultList.appendChild(newListItem);
       }
       else {
         var flag = false;
         for (var i = 0; i < resultItems.length; i++) {
-          if (similarity.deltaE < parseFloat(resultItems[i].childNodes[0].childNodes[1].childNodes[0].childNodes[1].innerText)) {
+          if (similarity.deltaE < parseFloat(resultItems[i].childNodes[0].childNodes[1].childNodes[0].childNodes[1].dataset.deltaE)) {
             resultList.insertBefore(newListItem, resultItems[i]);
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) resultList.appendChild(newListItem);
+      }
+    }
+    else if (algorithm.type == 'kmcc') {
+      if (resultItems.length == 0) {
+        resultList.appendChild(newListItem);
+      }
+      else {
+        var flag = false;
+        for (var i = 0; i < resultItems.length; i++) {
+          var targetMetric = similarity.deltaE * (1 / (similarity.cluster_percentage / 100));
+          var source = resultItems[i].childNodes[0].childNodes[1];
+          var sourceMetric = parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE) * (1 / (parseFloat(source.childNodes[1].childNodes[1].dataset.clusterPercentage) / 100));
+
+          if (targetMetric <= sourceMetric) {
+            if (targetMetric == sourceMetric && similarity.deltaE > parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE))
+              resultList.appendChild(newListItem);
+            else
+              resultList.insertBefore(newListItem, resultItems[i]);
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) resultList.appendChild(newListItem);
+      }
+    }
+    else { // TODO: cont. here
+      if (resultItems.length == 0) {
+        resultList.appendChild(newListItem);
+      }
+      else {
+        var flag = false;
+        for (var i = 0; i < resultItems.length; i++) {
+          var targetMetric = similarity.deltaE * (1 / (similarity.threshold_percentage / 100));
+          var source = resultItems[i].childNodes[0].childNodes[1];
+          var sourceMetric = parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE) * (1 / (parseFloat(source.childNodes[1].childNodes[1].dataset.thresholdPercentage) / 100));
+
+          if (targetMetric <= sourceMetric) {
+            if (targetMetric == sourceMetric && similarity.deltaE > parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE))
+              resultList.appendChild(newListItem);
+            else
+              resultList.insertBefore(newListItem, resultItems[i]);
             flag = true;
             break;
           }
