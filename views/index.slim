@@ -12,9 +12,6 @@ html
 
     h1 Flickr<span id="header-colored"><span style="font-size: 0.8em;">+</span>Colors</span>
 
-    //p id='info-processed'
-    //p id='info-total'
-
     div id='controls'
       ol id='controls-basic'
         li
@@ -22,9 +19,6 @@ html
           input id='search-text' type='text'
           br
 
-          //label for='search-color-switch' Dle barvy
-          //input id='search-color-switch' type='checkbox' checked=true
-          //br
         li
           label for='search-color' Which color should it be?
           input id='search-color' type='color'
@@ -39,6 +33,12 @@ html
         i id='controls-advanced-toggle' class='fa fa-cog'
 
       ul id='controls-advanced'
+        li
+          label for='search-count' How many photos do you want?
+          input id='search-count' type='range' min=1 max=500 value=20
+          span id='search-count-display' (20)
+        br style='clear: both;'
+
         li
           label for='search-algorithm' Which algorithm to use?
           input name='search-algorithm' type='radio' value='tc' Threshold coverage

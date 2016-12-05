@@ -11,10 +11,11 @@ end
 
 get '/search' do
   content_type :json
-  text = params['text']
+  text = params[:text]
+  count = params[:count]
 
   flickr = Flickr.new('6b9f37752302a413f13966f78431d076')
-  flickr.search(text).to_json
+  flickr.search(text, count).to_json
 end
 
 get '/similarity' do

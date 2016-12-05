@@ -35,6 +35,11 @@
     }
   });
 
+  var searchCount = document.getElementById('search-count');
+  var searchCountDisplay = document.getElementById('search-count-display');
+  searchCount.addEventListener('input', function() {
+    searchCountDisplay.innerText = '(' + searchCount.value + ')';
+  });
   var kMeansK = document.getElementById('search-km-k');
   var kMeansKDisplay = document.getElementById('search-km-k-display');
   kMeansK.addEventListener('input', function() {
@@ -86,9 +91,12 @@
     document.getElementById('progress-bar').style.display = 'initial'
     document.getElementById('progress-value').style.display = 'initial';
 
+    var searchCount = document.getElementById('search-count').value;
+    var requestUrl = '/search?text=' + searchText + '&count=' + searchCount;
+
     var request = new XMLHttpRequest();
     request.addEventListener('readystatechange', getResults);
-    request.open("GET", '/search?text=' + searchText, true);
+    request.open("GET", requestUrl, true);
     request.send();
   }
 

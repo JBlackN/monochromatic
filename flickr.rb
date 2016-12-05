@@ -10,12 +10,12 @@ class Flickr
     @api_key = api_key
   end
 
-  def search(text)
+  def search(text, count)
     params = {
       method: 'flickr.photos.search',
       format: 'json',
       text: text,
-      per_page: 20, # TODO: change or remove
+      per_page: count,
       api_key: @api_key
     }
 
