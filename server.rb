@@ -25,7 +25,7 @@ get '/similarity' do
   color = params[:color]
   type = params[:type]
 
-  cached_path = "./image_cache/#{id}.jpg"
+  cached_path = "./cache/#{id}.jpg"
   open_uri_opts = { ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE }
 
   open(url, open_uri_opts) do |photo|
