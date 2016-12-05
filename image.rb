@@ -11,13 +11,13 @@ class Picture
     @histogram = Hash.new(0)
 
     image.color_histogram.each do |pixel, count|
-      color_8bit = {
-        R: pixel.red / 256,
-        G: pixel.green / 256,
-        B: pixel.blue / 256
+      color = {
+        R: pixel.red,
+        G: pixel.green,
+        B: pixel.blue
       }
 
-      @histogram[color_8bit] += count
+      @histogram[color] += count
     end
 
     @histogram.each do |color, count|
@@ -28,23 +28,23 @@ class Picture
     @dominant_colors = kmeans(k, min_diff) unless k.nil? || min_diff.nil?
   end
 
-  def similarity(type, target, threshold = nil)
-    fail 'Similarity needs hex color.' unless target =~ /^#[0-9a-fA-F]{6}$/
+  def similarity(type, reference, threshold = nil)
+    fail 'Similarity needs hex color.' unless reference =~ /^#[0-9a-fA-F]{6}$/
 
-    target = {
-      :R => target[1..2].to_i(16),
-      :G => target[3..4].to_i(16),
-      :B => target[5..6].to_i(16)
+    reference = {
+      :R => reference[1..2].to_i(16),
+      :G => reference[3..4].to_i(16),
+      :B => reference[5..6].to_i(16)
     }
-    target.merge!(rgb2xyz(target[:R], target[:G], target[:B]))
-    target.merge!(xyz2lab(target[:X], target[:Y], target[:Z]))
+    reference.merge!(rgb2xyz(reference[:R], reference[:G], reference[:B]))
+    reference.merge!(xyz2lab(reference[:X], reference[:Y], reference[:Z]))
 
     if type.include?('km')
       results = []
 
       @dominant_colors.each do |color, percentage|
         results << {
-          deltaE: deltaE94(color, target)[:deltaE],
+          deltaE: deltaE94(color, reference)[:deltaE],
           cluster_percentage: percentage
         }
       end
@@ -54,7 +54,7 @@ class Picture
 
     if type.include?('tc') && !threshold.nil?
       @histogram.each do |color, count|
-        color.merge!(deltaE94(color, target))
+        color.merge!(deltaE94(reference, color))
       end
 
       sorted_histogram = @histogram.sort_by { |color, count| color[:deltaE] }
@@ -128,17 +128,17 @@ class Picture
     }
   end
 
-  def deltaE94(source, target)
+  def deltaE94(reference, sample)
     k1 = 0.045
     k2 = 0.015
     kL = kC = kH = 1
 
-    dL = source[:L] - target[:L]
-    da = source[:a] - target[:a]
-    db = source[:b] - target[:b]
+    dL = reference[:L] - sample[:L]
+    da = reference[:a] - sample[:a]
+    db = reference[:b] - sample[:b]
 
-    c1 = Math.sqrt((source[:a] ** 2) + (source[:b] ** 2))
-    c2 = Math.sqrt((target[:a] ** 2) + (target[:b] ** 2))
+    c1 = Math.sqrt((reference[:a] ** 2) + (reference[:b] ** 2))
+    c2 = Math.sqrt((sample[:a] ** 2) + (sample[:b] ** 2))
     dC = c1 - c2
 
     dH2 = (da ** 2) + (db ** 2) - (dC ** 2)
