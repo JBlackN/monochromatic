@@ -1,31 +1,46 @@
+require 'benchmark'
 require 'rmagick'
+
+require './log'
 
 class Picture
   include Magick
 
   def initialize(path, k = nil, min_diff = nil, resize = false)
-    image = Image.read(path).first
-    image = image.resize_to_fit(resize) if resize
+    time = Benchmark.measure do
+      image = Image.read(path).first
+      image = image.resize_to_fit(resize) if resize
 
-    @pixel_count = image.rows * image.columns
-    @histogram = Hash.new(0)
+      @pixel_count = image.rows * image.columns
+      @histogram = Hash.new(0)
 
-    image.color_histogram.each do |pixel, count|
-      color = {
-        R: pixel.red,
-        G: pixel.green,
-        B: pixel.blue
-      }
+      image.color_histogram.each do |pixel, count|
+        color = {
+          R: pixel.red,
+          G: pixel.green,
+          B: pixel.blue
+        }
 
-      @histogram[color] += count
+        @histogram[color] += count
+      end
     end
 
-    @histogram.each do |color, count|
-      color.merge!(rgb2xyz(color[:R], color[:G], color[:B]))
-      color.merge!(xyz2lab(color[:X], color[:Y], color[:Z]))
+    Log.instance.log(:readhist, time.real)
+
+    time = Benchmark.measure do
+      @histogram.each do |color, count|
+        color.merge!(rgb2xyz(color[:R], color[:G], color[:B]))
+        color.merge!(xyz2lab(color[:X], color[:Y], color[:Z]))
+      end
     end
 
-    @dominant_colors = kmeans(k, min_diff) unless k.nil? || min_diff.nil?
+    Log.instance.log(:colorspace, time.real)
+
+    time = Benchmark.measure do
+      @dominant_colors = kmeans(k, min_diff) unless k.nil? || min_diff.nil?
+    end
+
+    Log.instance.log(:kmeans, time.real)
   end
 
   def similarity(type, reference, threshold = nil)
