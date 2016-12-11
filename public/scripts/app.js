@@ -62,6 +62,11 @@
       thrTMeaning = 'very obvious difference.';
     thrTDisplay.innerText = '(' + thrT.value + ' ~ ' + thrTMeaning + ')';
   });
+  var covEffect = document.getElementById('search-cov-effect');
+  var covEffectDisplay = document.getElementById('search-cov-effect-display');
+  covEffect.addEventListener('input', function() {
+    covEffectDisplay.innerText = '(' + parseInt(parseFloat(covEffect.value) * 100) + '%)';
+  });
 
   var searchSubmit = document.getElementById('search-submit');
   searchSubmit.addEventListener('click', search);
@@ -254,7 +259,8 @@
         for (var i = 0; i < resultItems.length; i++) {
           var targetMetric = similarity.deltaE * (1 / (similarity.cluster_percentage / 100));
           var source = resultItems[i].childNodes[0].childNodes[1];
-          var sourceMetric = parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE) * (1 / (parseFloat(source.childNodes[1].childNodes[1].dataset.clusterPercentage) / 100));
+          var covEffect = parseFloat(document.getElementById('search-cov-effect').value);
+          var sourceMetric = parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE) * (1 / Math.pow((parseFloat(source.childNodes[1].childNodes[1].dataset.clusterPercentage) / 100), covEffect));
 
           if (targetMetric <= sourceMetric) {
             if (targetMetric == sourceMetric && similarity.deltaE > parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE))
@@ -277,7 +283,8 @@
         for (var i = 0; i < resultItems.length; i++) {
           var targetMetric = similarity.deltaE * (1 / (similarity.threshold_percentage / 100));
           var source = resultItems[i].childNodes[0].childNodes[1];
-          var sourceMetric = parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE) * (1 / (parseFloat(source.childNodes[1].childNodes[1].dataset.thresholdPercentage) / 100));
+          var covEffect = parseFloat(document.getElementById('search-cov-effect').value);
+          var sourceMetric = parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE) * (1 / Math.pow((parseFloat(source.childNodes[1].childNodes[1].dataset.thresholdPercentage) / 100), covEffect));
 
           if (targetMetric <= sourceMetric) {
             if (targetMetric == sourceMetric && similarity.deltaE > parseFloat(source.childNodes[0].childNodes[1].dataset.deltaE))
