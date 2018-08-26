@@ -1,27 +1,33 @@
 require 'benchmark'
-require 'rmagick'
+require 'mini_magick'
+require 'oily_png'
 
 require './log'
 
 class Picture
-  include Magick
-
   def initialize(path, k = nil, min_diff = nil, resize = false)
     time = Benchmark.measure do
-      image = Image.read(path).first
-      image = image.resize_to_fit(resize) if resize
+      image = MiniMagick::Image.open(path)
+      image.resize(resize.to_i) if resize
+      image.format('png')
 
-      @pixel_count = image.rows * image.columns
+      @pixel_count = image.height * image.width
       @histogram = Hash.new(0)
 
-      image.color_histogram.each do |pixel, count|
-        color = {
-          R: pixel.red,
-          G: pixel.green,
-          B: pixel.blue
-        }
+      pixels = ChunkyPNG::Image.from_io(StringIO.new(image.to_blob))
 
-        @histogram[color] += count
+      pixels.height.times do |y|
+        pixels.width.times do |x|
+          pixel = pixels[x, y].to_s(16).rjust(8, '0')
+
+          color = {
+            R: pixel[0..1].to_i(16),
+            G: pixel[2..3].to_i(16),
+            B: pixel[4..5].to_i(16)
+          }
+
+          @histogram[color] += 1
+        end
       end
     end
 
@@ -80,7 +86,7 @@ class Picture
 
       similarity_count = 0
       @histogram.each { |color, count| similarity_count += count }
-      
+
       result ||= {}
       result[:threshold_percentage] = 100 * (similarity_count / @pixel_count.to_f)
     end
@@ -106,7 +112,7 @@ class Picture
 
       channel *= 100
     end
-    
+
     r_norm, g_norm, b_norm = channels
 
     {
@@ -177,7 +183,7 @@ class Picture
         center: color
       }
     end
-    
+
     while true do
       cluster_colors = []
       k.times { |i| cluster_colors[i] = {} }
