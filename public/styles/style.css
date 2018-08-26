@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Istok+Web:400,400i,700,700i|Montserrat:400,700');
 
+html {
+  height: 100%;
+}
+
 div#progress-bar, div#progress-value {
   display: none;
   position: fixed;
@@ -17,9 +21,17 @@ div#progress-value {
 body {
   /*background: #fafafa;
   color: #0f0f0f;*/
-  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
   font-family: 'Montserrat', sans-serif;
   font-size: 0.9em;
+}
+
+#content {
+  flex: 1 0 auto;
+  padding: 2em;
 }
 
 h1 {
@@ -47,7 +59,6 @@ div i#controls-advanced-toggle {
 ul#controls-advanced {
   clear: both;
   display: none;
-  width: 100%;
   list-style-type: none;
 }
 
@@ -85,4 +96,10 @@ ol#results li div.image-wrapper div.image {
 
 span.img-meta {
   margin: 0 0.25em;
+}
+
+footer {
+  flex-shrink: 0;
+  padding: 1em 0;
+  text-align: center;
 }

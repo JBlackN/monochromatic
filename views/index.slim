@@ -2,71 +2,75 @@ doctype html
 html
   head
     meta charset='utf-8'
-    title Flickr+Colors
+    title Monochromatic
     link rel='stylesheet' type='text/css' href='styles/style.css'
     script src='https://use.fontawesome.com/cbfd837656.js'
 
   body
-    div id='progress-bar'
-    div id='progress-value'
+    div#content
+      div id='progress-bar'
+      div id='progress-value'
 
-    h1 Flickr<span id="header-colored"><span style="font-size: 0.8em;">+</span>Colors</span>
+      h1 Mono<span id="header-colored">chromatic</span>
 
-    div id='controls'
-      ol id='controls-basic'
-        li
-          label for='search-text' What to search for?
-          input id='search-text' type='text'
-          br
+      div id='controls'
+        ol id='controls-basic'
+          li
+            label for='search-text' What to search for?
+            input id='search-text' type='text'
+            br
 
-        li
-          label for='search-color' Which color should it be?
-          input id='search-color' type='color'
-          br
+          li
+            label for='search-color' Which color should it be?
+            input id='search-color' type='color'
+            br
 
-        li
-          button id='search-submit' type='button' Go
+          li
+            button id='search-submit' type='button' Go
 
-        li Sit back & enjoy your results as they appear :)
+          li Sit back & enjoy your results as they appear :)
 
-      div
-        i id='controls-advanced-toggle' class='fa fa-cog'
+        div
+          i id='controls-advanced-toggle' class='fa fa-cog'
 
-      ul id='controls-advanced'
-        li
-          label for='search-count' How many photos do you want?
-          input id='search-count' type='range' min=1 max=500 value=20
-          span id='search-count-display' (20)
-        br style='clear: both;'
+        ul id='controls-advanced'
+          li
+            label for='search-count' How many photos do you want?
+            input id='search-count' type='range' min=1 max=500 value=20
+            span id='search-count-display' (20)
+          br style='clear: both;'
 
-        li
-          label for='search-algorithm' Which algorithm to use?
-          input name='search-algorithm' type='radio' value='tc' Threshold coverage
-          input name='search-algorithm' type='radio' value='km' checked=true K-means
-          input name='search-algorithm' type='radio' value='kmcc' K-means with cluster coverage
-          input name='search-algorithm' type='radio' value='kmtc' K-means with threshold coverage
-        br style='clear: both;'
+          li
+            label for='search-algorithm' Which algorithm to use?
+            input name='search-algorithm' type='radio' value='tc' Threshold coverage
+            input name='search-algorithm' type='radio' value='km' checked=true K-means
+            input name='search-algorithm' type='radio' value='kmcc' K-means with cluster coverage
+            input name='search-algorithm' type='radio' value='kmtc' K-means with threshold coverage
+          br style='clear: both;'
 
-        li
-          label for='search-km-k' How many dominant colors should be extracted?
-          input id='search-km-k' type='range' min=1 max=16 value=3
-          span id='search-km-k-display' (3)
+          li
+            label for='search-km-k' How many dominant colors should be extracted?
+            input id='search-km-k' type='range' min=1 max=16 value=3
+            span id='search-km-k-display' (3)
 
-        li
-          label for='search-km-min-diff' Difference between iterations before stopping k-means should be less than&hellip;?
-          input id='search-km-min-diff' type='number' min=0.05 max=20 step=0.05 value=1
-        br style='clear: both;'
+          li
+            label for='search-km-min-diff' Difference between iterations before stopping k-means should be less than&hellip;?
+            input id='search-km-min-diff' type='number' min=0.05 max=20 step=0.05 value=1
+          br style='clear: both;'
 
-        li
-          label for='search-thr' Similarity threshold to include specific color in considerations should be&hellip;?
-          input id='search-thr' type='range' min=0.05 max=100 step=0.05 value=15
-          span id='search-thr-display' (15 ~ very obvious difference.)
+          li
+            label for='search-thr' Similarity threshold to include specific color in considerations should be&hellip;?
+            input id='search-thr' type='range' min=0.05 max=100 step=0.05 value=15
+            span id='search-thr-display' (15 ~ very obvious difference.)
 
-        li
-          label for='search-cov-effect' How much should coverage affect ordering?
-          input id='search-cov-effect' type='range' min=0 max=1 step=0.01 value=0.5
-          span id='search-cov-effect-display' (50%)
+          li
+            label for='search-cov-effect' How much should coverage affect ordering?
+            input id='search-cov-effect' type='range' min=0 max=1 step=0.01 value=0.5
+            span id='search-cov-effect-display' (50%)
 
-    ol id='results'
+      ol id='results'
+
+    footer
+      span This product uses the Flickr API but is not endorsed or certified by SmugMug, Inc.
 
     script type='text/javascript' src='scripts/app.js'
